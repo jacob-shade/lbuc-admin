@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	db       *gorm.DB
+	DB       *gorm.DB
 	dbModels = append(make([]interface{}, 0), models.User{}, models.Player{}, models.Team{})
 )
 
@@ -34,7 +34,7 @@ func ConnectToDatabase() {
 
 	// Connecting to database
 	var err error
-	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}
@@ -42,7 +42,7 @@ func ConnectToDatabase() {
 
 	//Auto migrating schema to keep up to date.
 	for _, model := range dbModels {
-		db.AutoMigrate(model)
+		DB.AutoMigrate(model)
 	}
 	fmt.Println("Automigrating database schema")
 }

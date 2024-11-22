@@ -1,11 +1,11 @@
 package main
 
 import (
-	"lbuc-admin/controllers"
 	"lbuc-admin/initializers"
+	"lbuc-admin/routes"
 	"log"
 
-	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v2"
 )
 
 func init() {
@@ -16,7 +16,7 @@ func init() {
 func main() {
 	app := fiber.New()
 
-	app.Get("/api", controllers.HealthCheck)
+	routes.Setup(app)
 
 	log.Fatal(app.Listen(":5000"))
 }

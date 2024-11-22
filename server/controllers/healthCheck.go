@@ -1,7 +1,7 @@
 package controllers
 
-import "github.com/gofiber/fiber/v3"
+import "github.com/gofiber/fiber/v2"
 
-func HealthCheck(c fiber.Ctx) error {
+func HealthCheck(c *fiber.Ctx) error {
 	return c.SendString("api is OK!")
 }
