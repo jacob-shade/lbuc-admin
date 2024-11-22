@@ -16,7 +16,7 @@ func init() {
 func main() {
 	app := fiber.New()
 
-	app.Get("/api", controllers.Welcome)
+	app.Get("/api", controllers.HealthCheck)
 
 	log.Fatal(app.Listen(":5000"))
 }
