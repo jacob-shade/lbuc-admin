@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"lbuc-admin/controllers"
+	"github.com/jacobshade/lbuc-admin/server/controllers"
 
 	"github.com/gofiber/fiber/v2"
 )

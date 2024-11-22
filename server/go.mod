@@ -1,4 +1,4 @@
-module lbuc-admin
+module github.com/jacobshade/lbuc-admin/server
 
 go 1.23.1
 

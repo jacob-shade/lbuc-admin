@@ -2,8 +2,9 @@ package initializers
 
 import (
 	"fmt"
-	"lbuc-admin/models"
 	"os"
+
+	"github.com/jacobshade/lbuc-admin/server/models"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"

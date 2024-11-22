@@ -1,9 +1,10 @@
 package main
 
 import (
-	"lbuc-admin/initializers"
-	"lbuc-admin/routes"
 	"log"
+
+	"github.com/jacobshade/lbuc-admin/server/initializers"
+	"github.com/jacobshade/lbuc-admin/server/routes"
 
 	"github.com/gofiber/fiber/v2"
 )

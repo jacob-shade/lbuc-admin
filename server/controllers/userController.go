@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"lbuc-admin/initializers"
-	"lbuc-admin/models"
+	"github.com/jacobshade/lbuc-admin/server/initializers"
+	"github.com/jacobshade/lbuc-admin/server/models"
 
 	"github.com/gofiber/fiber/v2"
 )
