@@ -9,9 +9,10 @@ import (
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
-
-//models = append(make([]interface{}, 0), model.User{},)
+var (
+	db       *gorm.DB
+	dbModels = append(make([]interface{}, 0), models.User{}, models.Player{}, models.Team{})
+)
 
 // Connect connects to the database with the config given in the .env file and
 // the models given in the database package.
@@ -32,16 +33,16 @@ func ConnectToDatabase() {
 		username, password, protocol, address, port, dbName)
 
 	// Connecting to database
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	var err error
+	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}
 	fmt.Printf("Connected to %v database\n", dbName)
 
 	//Auto migrating schema to keep up to date.
-	// for _, model := range models {
-	// 	db.AutoMigrate(model)
-	// }
-	db.AutoMigrate(&models.User{})
-	// fmt.Println("Automigrating database schema")
+	for _, model := range dbModels {
+		db.AutoMigrate(model)
+	}
+	fmt.Println("Automigrating database schema")
 }
