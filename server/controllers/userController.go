@@ -32,7 +32,9 @@ func CreateUser(c *fiber.Ctx) error {
 
 func GetUsers(c *fiber.Ctx) error {
 	users := []models.User{}
-	initializers.DB.Find(&users)
+	if err := initializers.DB.Find(&users).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
 	responseUsers := []User{}
 	for _, user := range users {
 		responseUsers = append(responseUsers, CreateResponseUser(user))
