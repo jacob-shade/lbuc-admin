@@ -1,6 +1,9 @@
 import * as React from "react"
 import { useState, useEffect } from "react"
 import { GalleryVerticalEnd } from "lucide-react"
+import { Link } from "react-router-dom"
+import { BASE_URL } from "@/config"
+import { Team } from "@/types"
 
 import {
   Sidebar,
@@ -19,13 +22,6 @@ import {
 const teamLogistics = ["Checklist", "Emergency Contacts", "Email List"]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-    const BASE_URL = "http://localhost:5000"
-
-    interface Team {
-        id: number;
-        team_name: string;
-    }
-
     const [teams, setTeams] = useState<Team[]>([]);
 
     useEffect(() => {
@@ -37,15 +33,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         fetchTeams()
     }, [])
 
-    console.log("TEAMS", teams)
-
   return (
     <Sidebar {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
+              <Link to="/">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <GalleryVerticalEnd className="size-4" />
                 </div>
@@ -53,7 +47,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <span className="font-semibold">Lake Braddock Ultimate Club</span>
                   <span className="">Admin Dashboard</span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -64,9 +58,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             {teams.map((team) => (
               <SidebarMenuItem key={team.id}>
                 <SidebarMenuButton asChild>
-                  <a href={`/team/${team.id}`} className="font-medium">
+                  <Link to={`/team/${team.id}`} className="font-medium">
                     {team.team_name}
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
                 {teamLogistics.length ? (
                   <SidebarMenuSub>
