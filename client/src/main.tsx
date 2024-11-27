@@ -8,19 +8,13 @@ import { AppSidebar } from "@/components/app-sidebar"
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <SidebarProvider>
-      <div className="flex min-h-screen">
-        <div className="flex-shrink-0">
-          <AppSidebar />
+      <AppSidebar />
+      <main className="flex">
+        <div className="p-3">
+          <SidebarTrigger />
         </div>
-        <div className="flex flex-1 flex-col">
-          <div className="flex items-center p-4">
-            <SidebarTrigger />
-          </div>
-          <main>
-            <App />
-          </main>
-        </div>
-      </div>
+        <App />
+      </main>
     </SidebarProvider>
   </StrictMode> 
 )
