@@ -22,7 +22,13 @@ type TeamBasic struct {
 func CreateResponseTeam(teamModel models.Team) Team {
 	players := make([]Player, len(teamModel.Players))
 	for i, p := range teamModel.Players {
-		players[i] = Player{ID: p.ID, PlayerName: p.PlayerName}
+		players[i] = Player{
+			ID: p.ID, PlayerName: p.PlayerName, NickName: p.NickName,
+			Pronouns: p.Pronouns, Grade: p.Grade, Birthday: p.Birthday,
+			PlayerEmail: p.PlayerEmail, ParentName: p.ParentName, ParentEmail: p.ParentEmail,
+			ParentNumber: p.ParentNumber, Relationship: p.Relationship, Address: p.Address,
+			MedicalNotes: p.MedicalNotes,
+		}
 	}
 	return Team{ID: teamModel.ID, TeamName: teamModel.TeamName, Players: players}
 }

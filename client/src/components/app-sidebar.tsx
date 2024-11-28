@@ -19,7 +19,11 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 
-const teamLogistics = ["Checklist", "Emergency Contacts", "Email List"]
+const teamLogistics = [
+  { name: "Checklist", path: "/checklist" },
+  { name: "Emergency Contacts", path: "/emergency-contacts" },
+  { name: "Email List", path: "/email-list" },
+]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const [teams, setTeams] = useState<Team[]>([]);
@@ -65,9 +69,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 {teamLogistics.length ? (
                   <SidebarMenuSub>
                     {teamLogistics.map((item) => (
-                      <SidebarMenuSubItem key={item}>
+                      <SidebarMenuSubItem key={item.name}>
                         <SidebarMenuSubButton asChild>
-                          <a href="#">{item}</a>
+                          <Link to={`${item.path}/${team.id}`}>{item.name}</Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     ))}

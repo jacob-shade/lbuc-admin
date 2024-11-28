@@ -1,21 +1,10 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom"
+import type { Team } from "@/types";
+import { BASE_URL } from "@/config";
 
 export default function Team() {
   const { id } = useParams()
-
-  const BASE_URL = "http://localhost:5000"
-
-  interface Team {
-      id: number;
-      team_name: string;
-      players: Player[];
-  }
-
-  interface Player {
-      id: number;
-      player_name: string;
-  }
 
   const [team, setTeam] = useState<Team>();
 
