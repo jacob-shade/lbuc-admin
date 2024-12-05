@@ -13,8 +13,8 @@ func Setup(app *fiber.App) {
 
 	// Auth endpoints /api/auth
 	auth := api.Group("/auth")
-	auth.Get("/", handler.Auth)
-	auth.Get("/google/callback", handler.Callback)
+	auth.Get("/", handler.GoogleLogin)
+	auth.Get("/google/callback", handler.GoogleCallback)
 
 	// User endpoints /api/user
 	user := api.Group("/user")

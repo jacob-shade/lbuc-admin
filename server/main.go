@@ -24,4 +24,7 @@ func main() {
 	routes.Setup(app)
 
 	log.Fatal(app.Listen(":5000"))
+	// go func() {
+	// 	log.Fatal(app.Listen(":5000"))
+	// }()
 }

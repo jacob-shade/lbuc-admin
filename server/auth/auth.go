@@ -6,26 +6,9 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 
 	"github.com/jacobshade/lbuc-admin/server/model"
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
 )
-
-// ConfigGoogle to set config of oauth
-func ConfigGoogle() *oauth2.Config {
-	conf := &oauth2.Config{
-		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
-		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
-		RedirectURL:  os.Getenv("GOOGLE_REDIRECT_URL"),
-		Scopes: []string{
-			"https://www.googleapis.com/auth/userinfo.email",
-		}, // you can use other scopes to get more data
-		Endpoint: google.Endpoint,
-	}
-	return conf
-}
 
 // GetEmail of user
 func GetEmail(token string) string {
