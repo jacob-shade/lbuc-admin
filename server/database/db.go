@@ -1,10 +1,10 @@
-package initializers
+package database
 
 import (
 	"fmt"
 	"os"
 
-	"github.com/jacobshade/lbuc-admin/server/models"
+	"github.com/jacobshade/lbuc-admin/server/model"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -12,7 +12,7 @@ import (
 
 var (
 	DB       *gorm.DB
-	dbModels = append(make([]interface{}, 0), models.User{}, models.Player{}, models.Team{})
+	dbModels = append(make([]interface{}, 0), model.User{}, model.Player{}, model.Team{})
 )
 
 // Connect connects to the database with the config given in the .env file and
@@ -26,9 +26,9 @@ func ConnectToDatabase() {
 	// Loading in database enviornment variables.
 	username := os.Getenv("DB_USERNAME")
 	password := os.Getenv("DB_PASSWORD")
-	protocol := os.Getenv("PROTOCOL")
-	address := os.Getenv("ADDRESS")
-	port := os.Getenv("PORT")
+	protocol := os.Getenv("DB_PROTOCOL")
+	address := os.Getenv("DB_ADDRESS")
+	port := os.Getenv("DB_PORT")
 	dbName := os.Getenv("DB_NAME")
 	dsn := fmt.Sprintf("%v:%v@%v(%v:%v)/%v?charset=utf8&parseTime=True&loc=Local",
 		username, password, protocol, address, port, dbName)

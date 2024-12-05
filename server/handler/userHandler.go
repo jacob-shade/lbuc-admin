@@ -1,8 +1,8 @@
-package controllers
+package handler
 
 import (
-	"github.com/jacobshade/lbuc-admin/server/initializers"
-	"github.com/jacobshade/lbuc-admin/server/models"
+	"github.com/jacobshade/lbuc-admin/server/database"
+	"github.com/jacobshade/lbuc-admin/server/model"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -14,25 +14,25 @@ type User struct {
 	Email string `json:"email"`
 }
 
-func CreateResponseUser(userModel models.User) User {
+func CreateResponseUser(userModel model.User) User {
 	return User{ID: userModel.ID, Name: userModel.Name, Email: userModel.Email}
 }
 
 func CreateUser(c *fiber.Ctx) error {
-	user := models.User{}
+	user := model.User{}
 	if err := c.BodyParser(&user); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	initializers.DB.Create(&user)
+	database.DB.Create(&user)
 	responseUser := CreateResponseUser(user)
 
 	return c.Status(fiber.StatusOK).JSON(responseUser)
 }
 
 func GetUsers(c *fiber.Ctx) error {
-	users := []models.User{}
-	if err := initializers.DB.Find(&users).Error; err != nil {
+	users := []model.User{}
+	if err := database.DB.Find(&users).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	responseUsers := []User{}
@@ -49,8 +49,8 @@ func GetUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
 	}
 
-	user := models.User{}
-	if err = initializers.DB.First(&user, id).Error; err != nil {
+	user := model.User{}
+	if err = database.DB.First(&user, id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "User not found"})
 	}
 	responseUser := CreateResponseUser(user)
@@ -64,8 +64,8 @@ func UpdateUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
 	}
 
-	user := models.User{}
-	if err = initializers.DB.First(&user, id).Error; err != nil {
+	user := model.User{}
+	if err = database.DB.First(&user, id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "User not found"})
 	}
 
@@ -79,7 +79,7 @@ func UpdateUser(c *fiber.Ctx) error {
 	}
 
 	user.Name = updateData.Name
-	initializers.DB.Save(&user)
+	database.DB.Save(&user)
 	responseUser := CreateResponseUser(user)
 
 	return c.Status(fiber.StatusOK).JSON(responseUser)
@@ -91,12 +91,12 @@ func DeleteUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
 	}
 
-	user := models.User{}
-	if err = initializers.DB.First(&user, id).Error; err != nil {
+	user := model.User{}
+	if err = database.DB.First(&user, id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "User not found"})
 	}
 
-	if err = initializers.DB.Delete(&user).Error; err != nil {
+	if err = database.DB.Delete(&user).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	responseUser := CreateResponseUser(user)

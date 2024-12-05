@@ -3,7 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/jacobshade/lbuc-admin/server/initializers"
+	"github.com/jacobshade/lbuc-admin/server/config"
+	"github.com/jacobshade/lbuc-admin/server/database"
 	"github.com/jacobshade/lbuc-admin/server/routes"
 
 	"github.com/gofiber/fiber/v2"
@@ -11,8 +12,8 @@ import (
 )
 
 func init() {
-	initializers.LoadEnvVariables()
-	initializers.ConnectToDatabase()
+	config.LoadEnvVariables()
+	database.ConnectToDatabase()
 }
 
 func main() {

@@ -1,10 +1,10 @@
-package controllers
+package handler
 
 import (
 	"time"
 
-	"github.com/jacobshade/lbuc-admin/server/initializers"
-	"github.com/jacobshade/lbuc-admin/server/models"
+	"github.com/jacobshade/lbuc-admin/server/database"
+	"github.com/jacobshade/lbuc-admin/server/model"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -26,7 +26,7 @@ type Player struct {
 	MedicalNotes string    `json:"medical_notes"`
 }
 
-func CreateResponsePlayer(playerModel models.Player) Player {
+func CreateResponsePlayer(playerModel model.Player) Player {
 	return Player{ID: playerModel.ID, PlayerName: playerModel.PlayerName, NickName: playerModel.NickName,
 		Pronouns: playerModel.Pronouns, Grade: playerModel.Grade,
 		Birthday: playerModel.Birthday, PlayerEmail: playerModel.PlayerEmail,
@@ -36,19 +36,19 @@ func CreateResponsePlayer(playerModel models.Player) Player {
 }
 
 func CreatePlayer(c *fiber.Ctx) error {
-	player := models.Player{}
+	player := model.Player{}
 	if err := c.BodyParser(&player); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	initializers.DB.Create(&player)
+	database.DB.Create(&player)
 
 	return c.Status(fiber.StatusOK).JSON(CreateResponsePlayer(player))
 }
 
 func GetAllPlayers(c *fiber.Ctx) error {
-	players := []models.Player{}
-	if err := initializers.DB.Find(&players).Error; err != nil {
+	players := []model.Player{}
+	if err := database.DB.Find(&players).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	responsePlayers := []Player{}
@@ -65,8 +65,8 @@ func GetPlayer(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
 	}
 
-	player := models.Player{}
-	if err := initializers.DB.First(&player, id).Error; err != nil {
+	player := model.Player{}
+	if err := database.DB.First(&player, id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Player not found"})
 	}
 	responsePlayer := CreateResponsePlayer(player)
@@ -80,8 +80,8 @@ func UpdatePlayer(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
 	}
 
-	player := models.Player{}
-	if err := initializers.DB.First(&player, id).Error; err != nil {
+	player := model.Player{}
+	if err := database.DB.First(&player, id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Player not found"})
 	}
 
@@ -118,7 +118,7 @@ func UpdatePlayer(c *fiber.Ctx) error {
 	player.Address = updateData.Address
 	player.MedicalNotes = updateData.MedicalNotes
 
-	initializers.DB.Save(&player)
+	database.DB.Save(&player)
 	responsePlayer := CreateResponsePlayer(player)
 
 	return c.Status(fiber.StatusOK).JSON(responsePlayer)
@@ -130,12 +130,12 @@ func DeletePlayer(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
 	}
 
-	player := models.Player{}
-	if err := initializers.DB.First(&player, id).Error; err != nil {
+	player := model.Player{}
+	if err := database.DB.First(&player, id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Player not found"})
 	}
 
-	if err := initializers.DB.Delete(&player).Error; err != nil {
+	if err := database.DB.Delete(&player).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	responsePlayer := CreateResponsePlayer(player)

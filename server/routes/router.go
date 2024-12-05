@@ -1,35 +1,44 @@
 package routes
 
 import (
-	"github.com/jacobshade/lbuc-admin/server/controllers"
+	"github.com/jacobshade/lbuc-admin/server/handler"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 func Setup(app *fiber.App) {
+	api := app.Group("/api")
 	// Healthcheck endpoint
-	app.Get("/api", controllers.HealthCheck)
+	api.Get("/", handler.HealthCheck)
 
-	// User endpoints
-	app.Post("/api/user", controllers.CreateUser)
-	app.Get("/api/user", controllers.GetUsers)
-	app.Get("/api/user/:id", controllers.GetUser)
-	app.Put("/api/user/:id", controllers.UpdateUser)
-	app.Delete("/api/user/:id", controllers.DeleteUser)
+	// Auth endpoints /api/auth
+	auth := api.Group("/auth")
+	auth.Get("/", handler.Auth)
+	auth.Get("/google/callback", handler.Callback)
 
-	// Player endpoints
-	app.Post("/api/player", controllers.CreatePlayer)
-	app.Get("/api/player", controllers.GetAllPlayers)
-	app.Get("/api/player/:id", controllers.GetPlayer)
-	app.Put("/api/player/:id", controllers.UpdatePlayer)
-	app.Delete("/api/player/:id", controllers.DeletePlayer)
+	// User endpoints /api/user
+	user := api.Group("/user")
+	user.Post("/", handler.CreateUser)
+	user.Get("/", handler.GetUsers)
+	user.Get("/:id", handler.GetUser)
+	user.Put("/:id", handler.UpdateUser)
+	user.Delete("/:id", handler.DeleteUser)
 
-	// Team endpoints
-	app.Post("/api/team", controllers.CreateTeam)
-	app.Get("/api/team", controllers.GetAllTeams)
-	app.Get("/api/team/:id", controllers.GetTeam)
-	app.Put("/api/team/:id", controllers.UpdateTeamName)
-	app.Delete("/api/team/:id", controllers.DeleteTeam)
-	app.Post("/api/team/:id/player", controllers.AddPlayerToTeam)
-	app.Delete("/api/team/:teamId/player/:playerId", controllers.RemovePlayerFromTeam)
+	// Player endpoints /api/player
+	player := api.Group("/player")
+	player.Post("/", handler.CreatePlayer)
+	player.Get("/", handler.GetAllPlayers)
+	player.Get("/:id", handler.GetPlayer)
+	player.Put("/:id", handler.UpdatePlayer)
+	player.Delete("/:id", handler.DeletePlayer)
+
+	// Team endpoints /api/team
+	team := api.Group("/team")
+	team.Post("/", handler.CreateTeam)
+	team.Get("/", handler.GetAllTeams)
+	team.Get("/:id", handler.GetTeam)
+	team.Put("/:id", handler.UpdateTeamName)
+	team.Delete("/:id", handler.DeleteTeam)
+	team.Post("/:id/player", handler.AddPlayerToTeam)
+	team.Delete("/:teamId/player/:playerId", handler.RemovePlayerFromTeam)
 }
