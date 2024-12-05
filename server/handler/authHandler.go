@@ -7,6 +7,7 @@ import (
 )
 
 // Auth fiber handler
+// Redirects to Google login URL
 func Auth(c *fiber.Ctx) error {
 	path := auth.ConfigGoogle()
 	url := path.AuthCodeURL("state")
@@ -14,6 +15,7 @@ func Auth(c *fiber.Ctx) error {
 }
 
 // Callback to receive google's response
+// Handles Google OAuth2 callback and returns user's email
 func Callback(c *fiber.Ctx) error {
 	token, error := auth.ConfigGoogle().Exchange(c.Context(), c.FormValue("code"))
 	if error != nil {
