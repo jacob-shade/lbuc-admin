@@ -9,7 +9,7 @@ import (
 func Setup(app *fiber.App) {
 	api := app.Group("/api")
 	// Healthcheck endpoint
-	api.Get("/", handler.HealthCheck)
+	api.Get("/", handler.CheckStatus)
 
 	// Auth endpoints /api/auth
 	auth := api.Group("/auth")

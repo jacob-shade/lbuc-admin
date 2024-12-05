@@ -2,6 +2,6 @@ package handler
 
 import "github.com/gofiber/fiber/v2"
 
-func HealthCheck(c *fiber.Ctx) error {
+func CheckStatus(c *fiber.Ctx) error {
 	return c.SendString("api is OK!")
 }
