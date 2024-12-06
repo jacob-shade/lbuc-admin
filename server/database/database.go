@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"github.com/gofiber/storage/mysql/v2"
@@ -60,5 +61,6 @@ func SetupSessionStore() {
 	Store = session.New(session.Config{
 		CookieSecure: true,
 		Storage:      storage,
+		Expiration:   7 * 24 * time.Hour, // 1 week
 	})
 }
