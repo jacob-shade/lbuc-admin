@@ -2,10 +2,13 @@ package handler
 
 import (
 	"context"
-	"io/ioutil"
+	"encoding/json"
+	"io"
 	"net/http"
 
 	"github.com/jacobshade/lbuc-admin/server/config"
+	"github.com/jacobshade/lbuc-admin/server/database"
+	"github.com/jacobshade/lbuc-admin/server/model"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -35,7 +38,6 @@ func GoogleCallback(c *fiber.Ctx) error {
 	}
 
 	code := c.Query("code")
-
 	googlecon := config.GoogleConfig()
 
 	token, err := googlecon.Exchange(context.Background(), code)
@@ -48,11 +50,33 @@ func GoogleCallback(c *fiber.Ctx) error {
 		return c.SendString("User Data Fetch Failed")
 	}
 
-	userData, err := ioutil.ReadAll(resp.Body)
+	userData, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return c.SendString("JSON Parsing Failed")
 	}
 
-	return c.SendString(string(userData))
+	var googleUser model.GoogleResponse
+	if err := json.Unmarshal(userData, &googleUser); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to parse user data"})
+	}
 
+	// Create session
+	sess, err := database.Store.Get(c)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create session"})
+	}
+
+	// Set session values
+	sess.Set("email", googleUser.Email)
+	sess.Set("user_id", googleUser.ID)
+
+	// Save session
+	if err := sess.Save(); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to save session"})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"email": googleUser.Email,
+		"login": true,
+	})
 }

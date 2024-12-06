@@ -1,9 +1,9 @@
 package routes
 
 import (
-	"github.com/jacobshade/lbuc-admin/server/handler"
-
 	"github.com/gofiber/fiber/v2"
+	"github.com/jacobshade/lbuc-admin/server/handler"
+	"github.com/jacobshade/lbuc-admin/server/middleware"
 )
 
 func Setup(app *fiber.App) {
@@ -11,10 +11,13 @@ func Setup(app *fiber.App) {
 	// Healthcheck endpoint
 	api.Get("/", handler.CheckStatus)
 
-	// Auth endpoints /api/auth
+	// Auth endpoints /api/auth (public endpoints)
 	auth := api.Group("/auth")
 	auth.Get("/", handler.GoogleLogin)
 	auth.Get("/google/callback", handler.GoogleCallback)
+
+	// Protected endpoints
+	api.Use(middleware.AuthRequired())
 
 	// User endpoints /api/user
 	user := api.Group("/user")

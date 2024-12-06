@@ -4,24 +4,20 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/gofiber/fiber/v2/middleware/session"
+	"github.com/gofiber/storage/mysql/v2"
 	"github.com/jacobshade/lbuc-admin/server/model"
 
-	"gorm.io/driver/mysql"
+	gormMysql "gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 var (
 	DB       *gorm.DB
+	Store    *session.Store
 	dbModels = append(make([]interface{}, 0), model.User{}, model.Player{}, model.Team{})
 )
 
-// Connect connects to the database with the config given in the .env file and
-// the models given in the database package.
-//
-// For details on dsn(data source name) formating, refer to [go-sql-driver]
-// docs.
-//
-// [go-sql-driver]: https://github.com/go-sql-driver/mysql#dsn-data-source-name
 func ConnectToDatabase() {
 	// Loading in database enviornment variables.
 	username := os.Getenv("DB_USERNAME")
@@ -35,7 +31,7 @@ func ConnectToDatabase() {
 
 	// Connecting to database
 	var err error
-	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	DB, err = gorm.Open(gormMysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}
@@ -46,4 +42,23 @@ func ConnectToDatabase() {
 		DB.AutoMigrate(model)
 	}
 	fmt.Println("Automigrating database schema")
+}
+
+// Adapters peiced together from gofiber storage and gorm
+func SetupSessionStore() {
+	sqlDB, err := DB.DB()
+	if err != nil {
+		panic(err)
+	}
+
+	storage := mysql.New(mysql.Config{
+		Db:    sqlDB,
+		Table: "sessions_store",
+		Reset: false,
+	})
+
+	Store = session.New(session.Config{
+		CookieSecure: true,
+		Storage:      storage,
+	})
 }

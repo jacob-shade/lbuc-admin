@@ -14,6 +14,7 @@ import (
 func init() {
 	config.LoadEnvVariables()
 	database.ConnectToDatabase()
+	database.SetupSessionStore()
 }
 
 func main() {
