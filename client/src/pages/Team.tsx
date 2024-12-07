@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom"
 import type { Team } from "@/types";
-import { BASE_URL } from "@/config";
+import { API_BASE_URL } from "@/config";
 
 export default function Team() {
   const { id } = useParams()
@@ -9,13 +9,13 @@ export default function Team() {
   const [team, setTeam] = useState<Team>();
 
   useEffect(() => {
-      const fetchTeam = async () => {
-          const res = await fetch(`${BASE_URL}/api/team/${id}`)
-          const data = await res.json() as Team
-          setTeam(data)
-      }
+    const fetchTeam = async () => {
+      const res = await fetch(`${API_BASE_URL}/team/${id}`)
+      const data = await res.json() as Team
+      setTeam(data)
+    }
 
-      fetchTeam()
+    fetchTeam()
   }, [id])
 
   return (

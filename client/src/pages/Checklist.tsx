@@ -1,6 +1,6 @@
 import { Player } from "@/types"
 import { CheckTable } from "@/components/check-table";
-import { BASE_URL } from "@/config";
+import { API_BASE_URL } from "@/config";
 import { Team } from "@/types";
 import { ColumnDef } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
@@ -13,7 +13,7 @@ export default function Checklist() {
 
   useEffect(() => {
     const fetchTeam = async () => {
-      const res = await fetch(`${BASE_URL}/api/team/${id}`)
+      const res = await fetch(`${API_BASE_URL}/team/${id}`)
       const data = await res.json() as Team
       setTeam(data)
     }

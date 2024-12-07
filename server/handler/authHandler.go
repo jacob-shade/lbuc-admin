@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"os"
 
 	"github.com/jacobshade/lbuc-admin/server/config"
 	"github.com/jacobshade/lbuc-admin/server/database"
@@ -75,8 +76,48 @@ func GoogleCallback(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to save session"})
 	}
 
+	// return c.Status(fiber.StatusOK).JSON(fiber.Map{
+	// 	"email": googleUser.Email,
+	// 	"login": true,
+	// })
+	return c.Redirect(os.Getenv("CLIENT_URL"), fiber.StatusTemporaryRedirect)
+}
+
+func GetSession(c *fiber.Ctx) error {
+	sess, err := database.Store.Get(c)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"authenticated": false,
+			"error":         "No session found",
+		})
+	}
+
+	email := sess.Get("email")
+	userID := sess.Get("user_id")
+
+	if email == nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"authenticated": false,
+			"error":         "Not authenticated",
+		})
+	}
+
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"email": googleUser.Email,
-		"login": true,
+		"authenticated": true,
+		"email":         email,
+		"user_id":       userID,
 	})
+}
+
+func Signout(c *fiber.Ctx) error {
+	sess, err := database.Store.Get(c)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "No session found"})
+	}
+
+	if err := sess.Destroy(); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to destroy session"})
+	}
+
+	return c.SendStatus(fiber.StatusOK)
 }

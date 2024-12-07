@@ -2,7 +2,7 @@ import * as React from "react"
 import { useState, useEffect } from "react"
 import { GalleryVerticalEnd } from "lucide-react"
 import { Link } from "react-router-dom"
-import { BASE_URL } from "@/config"
+import { API_BASE_URL } from "@/config"
 import { Team } from "@/types"
 
 import {
@@ -26,16 +26,16 @@ const teamLogistics = [
 ]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-    const [teams, setTeams] = useState<Team[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
 
-    useEffect(() => {
-        const fetchTeams = async () => {
-            const res = await fetch(`${BASE_URL}/api/team`)
-            const data = await res.json() as Team[]
-            setTeams(data)
-        }
-        fetchTeams()
-    }, [])
+  useEffect(() => {
+    const fetchTeams = async () => {
+      const res = await fetch(`${API_BASE_URL}/team`)
+      const data = await res.json() as Team[]
+      setTeams(data)
+    }
+    fetchTeams()
+  }, [])
 
   return (
     <Sidebar {...props}>

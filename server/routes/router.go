@@ -15,6 +15,8 @@ func Setup(app *fiber.App) {
 	auth := api.Group("/auth")
 	auth.Get("/", handler.GoogleLogin)
 	auth.Get("/google/callback", handler.GoogleCallback)
+	auth.Get("/session", handler.GetSession)
+	auth.Post("/signout", handler.Signout)
 
 	// Protected endpoints
 	api.Use(middleware.AuthRequired())
