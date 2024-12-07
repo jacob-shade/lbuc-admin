@@ -16,6 +16,8 @@ export default function Home() {
       <SignoutButton />
     </div>
   ) : (
-    <SigninButton />
+    <div className="flex justify-center items-center h-screen w-full">
+      <SigninButton />
+    </div>
   );
 }
