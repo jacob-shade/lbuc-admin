@@ -1,4 +1,4 @@
-import { SigninButton } from "@/components/signin-button";
+import { SignInForm } from "@/components/signin-form";
 import { SignoutButton } from "@/components/signout-button";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -17,7 +17,7 @@ export default function Home() {
     </div>
   ) : (
     <div className="flex justify-center items-center h-screen w-full">
-      <SigninButton />
+      <SignInForm />
     </div>
   );
 }
