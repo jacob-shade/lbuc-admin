@@ -5,7 +5,8 @@ import { AuthContext } from './auth-context';
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [email, setEmail] = useState<string | null>(null);
-    const [userId, setUserId] = useState<string | null>(null);
+    const [name, setName] = useState<string | null>(null);
+    const [picture, setPicture] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     const checkAuth = async () => {
@@ -17,12 +18,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             setIsAuthenticated(data.authenticated);
             setEmail(data.email || null);
-            setUserId(data.user_id || null);
+            setName(data.name || null);
+            setPicture(data.picture || null);
         } catch (error) {
             console.error('Error during authentication check:', error);
             setIsAuthenticated(false);
             setEmail(null);
-            setUserId(null);
+            setName(null);
+            setPicture(null);
         } finally {
             setIsLoading(false);
         }
@@ -41,7 +44,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } finally {
             setIsAuthenticated(false);
             setEmail(null);
-            setUserId(null);
+            setName(null);
+            setPicture(null);
         }
     };
 
@@ -54,7 +58,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             value={{
                 isAuthenticated,
                 email,
-                userId,
+                name,
+                picture,
                 isLoading,
                 checkAuth,
                 signin,

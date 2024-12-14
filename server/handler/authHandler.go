@@ -70,6 +70,8 @@ func GoogleCallback(c *fiber.Ctx) error {
 	// Set session values
 	sess.Set("email", googleUser.Email)
 	sess.Set("user_id", googleUser.ID)
+	sess.Set("name", googleUser.Name)
+	sess.Set("picture", googleUser.Picture)
 
 	// Save session
 	if err := sess.Save(); err != nil {
@@ -93,7 +95,8 @@ func GetSession(c *fiber.Ctx) error {
 	}
 
 	email := sess.Get("email")
-	userID := sess.Get("user_id")
+	name := sess.Get("name")
+	picture := sess.Get("picture")
 
 	if email == nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
@@ -105,7 +108,8 @@ func GetSession(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"authenticated": true,
 		"email":         email,
-		"user_id":       userID,
+		"name":          name,
+		"picture":       picture,
 	})
 }
 

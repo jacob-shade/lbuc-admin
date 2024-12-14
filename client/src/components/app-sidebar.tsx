@@ -4,10 +4,13 @@ import { GalleryVerticalEnd } from "lucide-react"
 import { Link } from "react-router-dom"
 import { API_BASE_URL } from "@/config"
 import { Team } from "@/types"
+import { NavUser } from "@/components/nav-user"
+import { useAuth } from "@/hooks/use-auth"
 
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarHeader,
   SidebarMenu,
@@ -27,6 +30,10 @@ const teamLogistics = [
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [teams, setTeams] = useState<Team[]>([]);
+  const { email, name, picture } = useAuth();
+  console.log("name", name)
+  console.log("picture", picture)
+  console.log("email", email)
 
   useEffect(() => {
     const fetchTeams = async () => {
@@ -82,6 +89,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <NavUser user={{ name: name ?? "", email: email ?? "", avatar: picture ?? "" }} />
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   )
