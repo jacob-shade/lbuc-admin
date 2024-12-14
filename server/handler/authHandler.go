@@ -9,10 +9,21 @@ import (
 
 	"github.com/jacobshade/lbuc-admin/server/config"
 	"github.com/jacobshade/lbuc-admin/server/database"
-	"github.com/jacobshade/lbuc-admin/server/model"
 
 	"github.com/gofiber/fiber/v2"
 )
+
+// GoogleResponse is the response sent by google
+type GoogleResponse struct {
+	ID            string `json:"id"`
+	Email         string `json:"email"`
+	VerifiedEmail bool   `json:"verified_email"`
+	Name          string `json:"name"`
+	GivenName     string `json:"given_name"`
+	FamilyName    string `json:"family_name"`
+	Picture       string `json:"picture"`
+	Locale        string `json:"locale"`
+}
 
 // Redirects to Google login URL
 func GoogleLogin(c *fiber.Ctx) error {
@@ -56,7 +67,7 @@ func GoogleCallback(c *fiber.Ctx) error {
 		return c.SendString("JSON Parsing Failed")
 	}
 
-	var googleUser model.GoogleResponse
+	var googleUser GoogleResponse
 	if err := json.Unmarshal(userData, &googleUser); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to parse user data"})
 	}
