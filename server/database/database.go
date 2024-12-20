@@ -16,7 +16,12 @@ import (
 var (
 	DB       *gorm.DB
 	Store    *session.Store
-	dbModels = append(make([]interface{}, 0), model.User{}, model.Player{}, model.Team{})
+	dbModels = append(make([]interface{}, 0),
+		model.User{},
+		model.Player{},
+		model.Team{},
+		model.Task{},
+	)
 )
 
 func ConnectToDatabase() {

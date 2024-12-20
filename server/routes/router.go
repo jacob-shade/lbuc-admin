@@ -46,4 +46,6 @@ func Setup(app *fiber.App) {
 	team.Delete("/:id", handler.DeleteTeam)
 	team.Post("/:id/player", handler.AddPlayerToTeam)
 	team.Delete("/:teamId/player/:playerId", handler.RemovePlayerFromTeam)
+	team.Post("/:id/task", handler.AddTaskToTeam)
+	team.Delete("/:teamId/task/:taskId", handler.RemoveTaskFromTeam)
 }

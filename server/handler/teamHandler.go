@@ -12,6 +12,7 @@ type Team struct {
 	ID       uint     `json:"id"`
 	TeamName string   `json:"team_name"`
 	Players  []Player `json:"players"`
+	Tasks    []Task   `json:"tasks"`
 }
 
 type TeamBasic struct {
@@ -30,7 +31,11 @@ func CreateResponseTeam(teamModel model.Team) Team {
 			MedicalNotes: p.MedicalNotes,
 		}
 	}
-	return Team{ID: teamModel.ID, TeamName: teamModel.TeamName, Players: players}
+	tasks := make([]Task, len(teamModel.Tasks))
+	for i, t := range teamModel.Tasks {
+		tasks[i] = Task{ID: t.ID, Description: t.Description}
+	}
+	return Team{ID: teamModel.ID, TeamName: teamModel.TeamName, Players: players, Tasks: tasks}
 }
 
 // Create a new team with a given name and empty player list
@@ -69,7 +74,7 @@ func GetTeam(c *fiber.Ctx) error {
 	}
 
 	var team model.Team
-	if err := database.DB.Preload("Players").First(&team, id).Error; err != nil {
+	if err := database.DB.Preload("Players").Preload("Tasks").First(&team, id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Team not found"})
 	}
 
@@ -98,6 +103,7 @@ func UpdateTeamName(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(TeamBasic{ID: team.ID, TeamName: team.TeamName})
 }
 
+// does this handle deleting a players assiciation with a team? tasks
 func DeleteTeam(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
@@ -141,7 +147,7 @@ func AddPlayerToTeam(c *fiber.Ctx) error {
 	// Find all players
 	var players []model.Player
 	if err := database.DB.Find(&players, req.PlayerIDs).Error; err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "One or more players not found"})
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Players not found"})
 	}
 
 	// Add players to team
@@ -192,4 +198,39 @@ func RemovePlayerFromTeam(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(CreateResponseTeam(team))
+}
+
+func AddTaskToTeam(c *fiber.Ctx) error {
+	// Get team ID, make sure it exists
+	teamID, err := c.ParamsInt("id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
+	}
+
+	// Find team, make sure it exists
+	var team model.Team
+	if err := database.DB.First(&team, teamID).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Team not found"})
+	}
+
+	// Get task description
+	var task Task
+	if err := c.BodyParser(&task); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	// Create task
+	newTask, err := CreateTask(task)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	// Add task to team
+	database.DB.Model(&team).Association("Tasks").Append(&newTask)
+
+	return c.Status(fiber.StatusOK).JSON(CreateResponseTeam(team))
+}
+
+func RemoveTaskFromTeam(c *fiber.Ctx) error {
+	return nil
 }
