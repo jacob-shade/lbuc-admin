@@ -2,6 +2,7 @@ interface Team {
     id: number;
     team_name: string;
     players: Player[];
+    tasks: Task[];
 }
 
 interface Player {
@@ -20,4 +21,9 @@ interface Player {
     medical_notes: string;
 }
 
-export type { Team, Player }
+interface Task {
+    id: number;
+    description: string;
+}
+
+export type { Team, Player, Task }

@@ -23,13 +23,11 @@ export default function Checklist() {
 
   const columns: ColumnDef<Player>[] = [
     { header: "Player Name", accessorKey: "player_name" },
-    { header: "LBUC Registration", accessorKey: "lbuc_reg" },
-    { header: "USAU Registration", accessorKey: "usau_reg" },
   ]
 
-  //console.log("EC team",team)
-  //console.log("EC players",team?.players)
-  //console.log("EC players[0]",team?.players[0])
+  for (const task of team?.tasks ?? []) {
+    columns.push({ header: task.description, accessorKey: task.description })
+  }
 
   return (
     <div>
