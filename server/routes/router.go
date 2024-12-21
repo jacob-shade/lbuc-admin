@@ -52,4 +52,5 @@ func Setup(app *fiber.App) {
 
 	// Check endpoints
 	api.Get("/task/:id/checks", handler.GetChecksForTask)
+	api.Post("/check", handler.UpdateCheck)
 }

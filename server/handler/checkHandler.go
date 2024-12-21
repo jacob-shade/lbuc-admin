@@ -68,3 +68,14 @@ func GetChecksForTask(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(responseChecks)
 }
+
+func UpdateCheck(c *fiber.Ctx) error {
+	var check Check
+	if err := c.BodyParser(&check); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	database.DB.Model(&model.Check{}).Where("task_id = ? AND player_id = ?", check.TaskID, check.PlayerID).Update("checked", check.Checked)
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Check updated"})
+}
