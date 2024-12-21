@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"fmt"
-
 	"github.com/jacobshade/lbuc-admin/server/database"
 	"github.com/jacobshade/lbuc-admin/server/model"
 
@@ -238,7 +236,6 @@ func AddTaskToTeam(c *fiber.Ctx) error {
 
 	// Add check for each player on the team
 	for _, player := range players {
-		fmt.Println("creating check for player", player.ID, "and task", newTask.ID)
 		CreateCheck(Check{PlayerID: player.ID, TaskID: newTask.ID, Checked: false})
 	}
 

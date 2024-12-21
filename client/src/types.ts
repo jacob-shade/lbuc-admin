@@ -26,4 +26,10 @@ interface Task {
     description: string;
 }
 
-export type { Team, Player, Task }
+interface Check {
+    player_id: number;
+    task_id: number;
+    checked: boolean;
+}
+
+export type { Team, Player, Task, Check }

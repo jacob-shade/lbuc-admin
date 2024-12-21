@@ -14,9 +14,12 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
+import { Check } from "@/types"
+
 interface CheckTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  checks: Record<number, Check[]>
 }
 
 export function CheckTable<TData, TValue>({
