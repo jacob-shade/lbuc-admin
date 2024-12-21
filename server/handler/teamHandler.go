@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"fmt"
+
 	"github.com/jacobshade/lbuc-admin/server/database"
 	"github.com/jacobshade/lbuc-admin/server/model"
 
@@ -201,8 +203,8 @@ func RemovePlayerFromTeam(c *fiber.Ctx) error {
 }
 
 func AddTaskToTeam(c *fiber.Ctx) error {
-	// Get team ID, make sure it exists
-	teamID, err := c.ParamsInt("id")
+	// Get team ID
+	teamID, err := c.ParamsInt("teamId")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
 	}
@@ -220,7 +222,7 @@ func AddTaskToTeam(c *fiber.Ctx) error {
 	}
 
 	// Create task
-	newTask, err := CreateTask(task)
+	newTask, err := CreateTask(task, uint(teamID))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -228,9 +230,44 @@ func AddTaskToTeam(c *fiber.Ctx) error {
 	// Add task to team
 	database.DB.Model(&team).Association("Tasks").Append(&newTask)
 
+	// Get all players on the team
+	var players []model.Player
+	if err := database.DB.Model(&team).Association("Players").Find(&players); err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Players not found"})
+	}
+
+	// Add check for each player on the team
+	for _, player := range players {
+		fmt.Println("creating check for player", player.ID, "and task", newTask.ID)
+		CreateCheck(Check{PlayerID: player.ID, TaskID: newTask.ID, Checked: false})
+	}
+
+	// TODO: Fix team response
 	return c.Status(fiber.StatusOK).JSON(CreateResponseTeam(team))
 }
 
 func RemoveTaskFromTeam(c *fiber.Ctx) error {
-	return nil
+	// Get team ID
+	teamID, err := c.ParamsInt("teamId")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
+	}
+
+	// Find team, make sure it exists
+	var team model.Team
+	if err := database.DB.First(&team, teamID).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Team not found"})
+	}
+
+	// Get task id
+	var task model.Task
+	if err := c.BodyParser(&task); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	// Remove task from team
+	database.DB.Model(&team).Association("Tasks").Delete(&task)
+
+	// TODO: Fix team response
+	return c.Status(fiber.StatusOK).JSON(CreateResponseTeam(team))
 }

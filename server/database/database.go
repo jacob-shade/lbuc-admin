@@ -21,6 +21,7 @@ var (
 		model.Player{},
 		model.Team{},
 		model.Task{},
+		model.Check{},
 	)
 )
 

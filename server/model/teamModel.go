@@ -1,10 +1,8 @@
 package model
 
-import "gorm.io/gorm"
-
 type Team struct {
-	gorm.Model
+	ID       uint     `gorm:"primaryKey" json:"id"`
 	TeamName string   `json:"team_name"`
 	Players  []Player `gorm:"many2many:player_teams;"`
-	Tasks    []Task   `gorm:"many2many:team_tasks;"`
+	Tasks    []Task   `gorm:"foreignKey:TeamRefer"`
 }

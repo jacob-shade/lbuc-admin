@@ -2,12 +2,10 @@ package model
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type Player struct {
-	gorm.Model
+	ID           uint      `gorm:"primaryKey" json:"id"`
 	PlayerName   string    `json:"player_name"`
 	NickName     string    `json:"nick_name"`
 	Pronouns     string    `json:"pronouns"`

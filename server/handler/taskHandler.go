@@ -16,9 +16,10 @@ func CreateResponseTask(taskModel model.Task) Task {
 	return Task{ID: taskModel.ID, Description: taskModel.Description}
 }
 
-func CreateTask(task Task) (model.Task, error) {
+func CreateTask(task Task, teamID uint) (model.Task, error) {
 	newTask := model.Task{}
 	newTask.Description = task.Description
+	newTask.TeamRefer = teamID
 
 	if err := database.DB.Create(&newTask).Error; err != nil {
 		return model.Task{}, err
