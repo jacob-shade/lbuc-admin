@@ -27,9 +27,9 @@ interface Task {
 }
 
 interface Check {
-    player_id: number;
-    task_id: number;
-    checked: boolean;
+    PlayerID: number;
+    TaskID: number;
+    Checked: boolean;
 }
 
 export type { Team, Player, Task, Check }

@@ -53,24 +53,50 @@ export default function Checklist() {
           const playerId = row.original.id;
           const taskId = task.id;
           const isChecked = checks[taskId]?.some(
-            check => check.player_id === playerId && check.checked
+            check => check.PlayerID === playerId && check.Checked
           );
 
           return (
-            <Checkbox
-              checked={isChecked}
-              onCheckedChange={(checked) => {
-                // Here you would add API call to update the check status
-                console.log(`Player ${playerId}, Task ${taskId}, Checked: ${checked}`);
-              }}
-            />
+            <div className="h-6 flex items-center justify-left">
+              <Checkbox
+                checked={isChecked}
+                onCheckedChange={async (checked) => {
+                  const check: Check = {
+                    TaskID: taskId,
+                    PlayerID: playerId,
+                    Checked: checked ? true : false
+                  }
+                  try {
+                    const response = await fetch(`${API_BASE_URL}/check`, {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json"
+                      },
+                      body: JSON.stringify(check)
+                    });
+                    if (response.ok) {
+                      // Update local state after successful API call
+                      setChecks(prevChecks => ({
+                        ...prevChecks,
+                        [taskId]: [
+                          ...(prevChecks[taskId]?.filter(c => c.PlayerID !== playerId) || []),
+                          check
+                        ]
+                      }));
+                    }
+                  } catch (error) {
+                    console.error("Failed to update check:", error);
+                    // Optionally add error handling UI here
+                  }
+                }}
+              />
+            </div>
+
           );
         }
       });
     }
   }
-
-  console.log("checks", checks)
 
   return (
     <div>

@@ -31,9 +31,6 @@ const teamLogistics = [
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [teams, setTeams] = useState<Team[]>([]);
   const { email, name, picture } = useAuth();
-  console.log("name", name)
-  console.log("picture", picture)
-  console.log("email", email)
 
   useEffect(() => {
     const fetchTeams = async () => {
