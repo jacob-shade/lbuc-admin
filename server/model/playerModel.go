@@ -7,7 +7,7 @@ import (
 type Player struct {
 	ID           uint      `gorm:"primaryKey" json:"id"`
 	PlayerName   string    `json:"player_name"`
-	NickName     string    `json:"nick_name"`
+	NickName     string    `json:"nickname"`
 	Pronouns     string    `json:"pronouns"`
 	Grade        string    `json:"grade"`
 	Birthday     time.Time `json:"birthday"`
