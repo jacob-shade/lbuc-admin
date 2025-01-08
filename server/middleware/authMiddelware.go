@@ -16,8 +16,7 @@ func AuthRequired() fiber.Handler {
 			})
 		}
 
-		email := sess.Get("email")
-		if email == nil {
+		if email := sess.Get("email"); email == nil {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"error": "Unauthorized",
 			})

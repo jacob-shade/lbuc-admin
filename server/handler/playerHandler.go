@@ -41,12 +41,12 @@ func CreatePlayer(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	createdPlayer, err := interactors.CreatePlayer(body)
+	player, err := interactors.CreatePlayer(body)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(CreateResponsePlayer(createdPlayer))
+	return c.Status(fiber.StatusOK).JSON(CreateResponsePlayer(player))
 }
 
 func GetAllPlayers(c *fiber.Ctx) error {
@@ -85,24 +85,16 @@ func UpdatePlayer(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
 	}
 
-	player, err := interactors.GetPlayer(uint(id))
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-	}
-
 	var updateData model.Player
 	if err := c.BodyParser(&updateData); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	err = interactors.UpdatePlayer(updateData, uint(id))
-	if err != nil {
+	if err := interactors.UpdatePlayer(updateData, uint(id)); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	responsePlayer := CreateResponsePlayer(player)
-
-	return c.Status(fiber.StatusOK).JSON(responsePlayer)
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Player updated successfully"})
 }
 
 func DeletePlayer(c *fiber.Ctx) error {
@@ -111,8 +103,7 @@ func DeletePlayer(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
 	}
 
-	err = interactors.DeletePlayer(uint(id))
-	if err != nil {
+	if err := interactors.DeletePlayer(uint(id)); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 

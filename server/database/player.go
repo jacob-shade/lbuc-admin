@@ -19,6 +19,14 @@ func GetPlayer(id uint) (model.Player, error) {
 	return player, nil
 }
 
+func GetListOfPlayers(playerIDs []uint) ([]model.Player, error) {
+	var players []model.Player
+	if err := DB.Find(&players, playerIDs).Error; err != nil {
+		return []model.Player{}, err
+	}
+	return players, nil
+}
+
 func GetAllPlayers() ([]model.Player, error) {
 	var players []model.Player
 	if err := DB.Find(&players).Error; err != nil {

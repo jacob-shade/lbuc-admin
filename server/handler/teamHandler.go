@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/jacobshade/lbuc-admin/server/database"
+	"github.com/jacobshade/lbuc-admin/server/interactors"
 	"github.com/jacobshade/lbuc-admin/server/model"
 
 	"github.com/gofiber/fiber/v2"
@@ -38,23 +39,24 @@ func CreateResponseTeam(teamModel model.Team) Team {
 	return Team{ID: teamModel.ID, TeamName: teamModel.TeamName, Players: players, Tasks: tasks}
 }
 
-// Create a new team with a given name and empty player list
 func CreateTeam(c *fiber.Ctx) error {
 	team := model.Team{}
 	if err := c.BodyParser(&team); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	database.DB.Create(&team)
-	responseTeam := CreateResponseTeam(team)
+	team, err := interactors.CreateTeam(team)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
 
+	responseTeam := CreateResponseTeam(team)
 	return c.Status(fiber.StatusOK).JSON(responseTeam)
 }
 
-// Gets all teams with ID and TeamName
 func GetAllTeams(c *fiber.Ctx) error {
-	teams := []model.Team{}
-	if err := database.DB.Find(&teams).Error; err != nil {
+	teams, err := interactors.GetAllTeams()
+	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
@@ -66,7 +68,6 @@ func GetAllTeams(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(responseTeams)
 }
 
-// Gets a team by ID with a list of all players on the team
 func GetTeam(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
@@ -87,20 +88,16 @@ func UpdateTeamName(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
 	}
 
-	team := model.Team{}
-	if err := database.DB.First(&team, id).Error; err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Team not found"})
-	}
-
 	var updateData TeamBasic
 	if err := c.BodyParser(&updateData); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	team.TeamName = updateData.TeamName
-	database.DB.Save(&team)
+	if err := interactors.UpdateTeamName(uint(id), updateData.TeamName); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
 
-	return c.Status(fiber.StatusOK).JSON(TeamBasic{ID: team.ID, TeamName: team.TeamName})
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Team name updated successfully"})
 }
 
 // does this handle deleting a players assiciation with a team? tasks
@@ -110,16 +107,11 @@ func DeleteTeam(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
 	}
 
-	team := model.Team{}
-	if err := database.DB.First(&team, id).Error; err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Team not found"})
-	}
-
-	if err := database.DB.Delete(&team).Error; err != nil {
+	if err := interactors.DeleteTeam(uint(id)); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(CreateResponseTeam(team))
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Team deleted successfully"})
 }
 
 func AddPlayerToTeam(c *fiber.Ctx) error {
@@ -138,111 +130,54 @@ func AddPlayerToTeam(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	// Find team
-	var team model.Team
-	if err := database.DB.First(&team, teamID).Error; err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Team not found"})
-	}
-
-	// Find all players
-	var players []model.Player
-	if err := database.DB.Find(&players, req.PlayerIDs).Error; err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Players not found"})
-	}
-
-	// Add players to team
-	if err := database.DB.Model(&team).Association("Players").Append(&players); err != nil {
+	if err := interactors.AddPlayersToTeam(uint(teamID), req.PlayerIDs); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	// Get updated team with players
-	if err := database.DB.Preload("Players").First(&team, teamID).Error; err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-	}
-
-	return c.Status(fiber.StatusOK).JSON(CreateResponseTeam(team))
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Players added to team successfully"})
 }
 
 func RemovePlayerFromTeam(c *fiber.Ctx) error {
 	// Get IDs from params
-	teamID, err := c.ParamsInt("teamId") // Assuming route param is "teamId"
+	teamID, err := c.ParamsInt("teamId")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid team ID"})
 	}
 
-	playerID, err := c.ParamsInt("playerId") // Assuming route param is "playerId"
+	playerID, err := c.ParamsInt("playerId")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid player ID"})
 	}
 
-	// Find team
-	var team model.Team
-	if err := database.DB.First(&team, teamID).Error; err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Team not found"})
-	}
-
-	// Find player
-	var player model.Player
-	if err := database.DB.First(&player, playerID).Error; err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Player not found"})
-	}
-
-	// Remove player from team
-	if err := database.DB.Model(&team).Association("Players").Delete(&player); err != nil {
+	if err := interactors.RemovePlayerFromTeam(uint(teamID), uint(playerID)); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	// Get updated team with players
-	if err := database.DB.Preload("Players").First(&team, teamID).Error; err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-	}
-
-	return c.Status(fiber.StatusOK).JSON(CreateResponseTeam(team))
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Player removed from team successfully"})
 }
 
-func AddTaskToTeam(c *fiber.Ctx) error {
+func CreateTaskForTeam(c *fiber.Ctx) error {
 	// Get team ID
 	teamID, err := c.ParamsInt("teamId")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
 	}
 
-	// Find team, make sure it exists
-	var team model.Team
-	if err := database.DB.First(&team, teamID).Error; err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Team not found"})
-	}
-
-	// Get task description
-	var task Task
+	// Get task
+	var task model.Task
 	if err := c.BodyParser(&task); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	// Create task
-	newTask, err := CreateTask(task, uint(teamID))
+	team, err := interactors.CreateTaskForTeam(uint(teamID), task.Description)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	// Add task to team
-	database.DB.Model(&team).Association("Tasks").Append(&newTask)
-
-	// Get all players on the team
-	var players []model.Player
-	if err := database.DB.Model(&team).Association("Players").Find(&players); err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Players not found"})
-	}
-
-	// Add check for each player on the team
-	for _, player := range players {
-		CreateCheck(Check{PlayerID: player.ID, TaskID: newTask.ID, Checked: false})
-	}
-
-	// TODO: Fix team response
 	return c.Status(fiber.StatusOK).JSON(CreateResponseTeam(team))
 }
 
+// TODO: no DATABASE USAGE
 func RemoveTaskFromTeam(c *fiber.Ctx) error {
 	// Get team ID
 	teamID, err := c.ParamsInt("teamId")

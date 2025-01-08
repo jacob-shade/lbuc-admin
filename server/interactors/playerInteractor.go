@@ -21,7 +21,7 @@ func CreatePlayer(player model.Player) (model.Player, error) {
 	// Create player in database
 	player, err := database.CreatePlayer(player)
 	if err != nil {
-		return model.Player{}, err
+		return model.Player{}, fmt.Errorf("failed to create player: %w", err)
 	}
 
 	return player, nil
@@ -45,6 +45,16 @@ func GetPlayer(id uint) (model.Player, error) {
 	}
 
 	return player, nil
+}
+
+func GetListOfPlayers(playerIDs []uint) ([]model.Player, error) {
+	// Get list of players from database
+	players, err := database.GetListOfPlayers(playerIDs)
+	if err != nil {
+		return []model.Player{}, fmt.Errorf("failed to get list of players: %w", err)
+	}
+
+	return players, nil
 }
 
 func GetAllPlayers() ([]model.Player, error) {
