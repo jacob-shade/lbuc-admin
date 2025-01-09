@@ -177,7 +177,6 @@ func CreateTaskForTeam(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(CreateResponseTeam(team))
 }
 
-// TODO: no DATABASE USAGE
 func RemoveTaskFromTeam(c *fiber.Ctx) error {
 	// Get team ID
 	teamID, err := c.ParamsInt("teamId")
@@ -185,21 +184,15 @@ func RemoveTaskFromTeam(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
 	}
 
-	// Find team, make sure it exists
-	var team model.Team
-	if err := database.DB.First(&team, teamID).Error; err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Team not found"})
-	}
-
 	// Get task id
-	var task model.Task
-	if err := c.BodyParser(&task); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	taskID, err := c.ParamsInt("taskId")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
 	}
 
-	// Remove task from team
-	database.DB.Model(&team).Association("Tasks").Delete(&task)
+	if err := interactors.RemoveTaskFromTeam(uint(teamID), uint(taskID)); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
 
-	// TODO: Fix team response
-	return c.Status(fiber.StatusOK).JSON(CreateResponseTeam(team))
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Task removed from team successfully"})
 }

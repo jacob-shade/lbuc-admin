@@ -9,6 +9,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { MoreHorizontal } from "lucide-react"
 
 export default function Checklist() {
   const { id } = useParams()
@@ -25,8 +27,6 @@ export default function Checklist() {
   }
 
   useEffect(() => {
-
-
     fetchTeam()
   }, [id])
 
@@ -85,6 +85,29 @@ export default function Checklist() {
     }
   };
 
+  const deleteTask = async (taskId: number) => {
+    if (!team) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/team/${team.id}/task/${taskId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        // Remove the checks for this task
+        setChecks(prev => {
+          const newChecks = { ...prev };
+          delete newChecks[taskId];
+          return newChecks;
+        });
+
+        await fetchTeam(); // Refetch team data to update the columns
+      }
+    } catch (error) {
+      console.error("Failed to delete task:", error);
+    }
+  };
+
   const columns: ColumnDef<Player>[] = [
     { id: "player_name", header: "Player Name", accessorKey: "player_name" },
   ]
@@ -93,7 +116,26 @@ export default function Checklist() {
     for (const task of team.tasks) {
       columns.push({
         id: `task-${task.id}`,
-        header: task.description,
+        header: () => (
+          <div className="flex items-center justify-between">
+            <span className="mr-2">{task.description}</span>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  className="text-red-600"
+                  onClick={() => deleteTask(task.id)}
+                >
+                  Delete Task
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        ),
         cell: ({ row }) => {
           const playerId = row.original.id;
           const taskId = task.id;

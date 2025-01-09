@@ -48,7 +48,7 @@ func Setup(app *fiber.App) {
 	team.Post("/:id/player", handler.AddPlayerToTeam)
 	team.Delete("/:teamId/player/:playerId", handler.RemovePlayerFromTeam)
 	team.Post("/:teamId/task", handler.CreateTaskForTeam)
-	team.Delete("/:teamId/task", handler.RemoveTaskFromTeam)
+	team.Delete("/:teamId/task/:taskId", handler.RemoveTaskFromTeam)
 
 	// Check endpoints
 	api.Get("/task/:id/checks", handler.GetChecksForTask)
