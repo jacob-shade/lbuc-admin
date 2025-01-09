@@ -6,19 +6,26 @@ import { ColumnDef } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom"
 import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 
 export default function Checklist() {
   const { id } = useParams()
 
   const [team, setTeam] = useState<Team>();
   const [checks, setChecks] = useState<Record<number, Check[]>>({});
+  const [newTaskDescription, setNewTaskDescription] = useState<string>("");
+  const [open, setOpen] = useState(false);
+
+  const fetchTeam = async () => {
+    const res = await fetch(`${API_BASE_URL}/team/${id}`)
+    const data = await res.json() as Team
+    setTeam(data)
+  }
 
   useEffect(() => {
-    const fetchTeam = async () => {
-      const res = await fetch(`${API_BASE_URL}/team/${id}`)
-      const data = await res.json() as Team
-      setTeam(data)
-    }
+
 
     fetchTeam()
   }, [id])
@@ -41,13 +48,51 @@ export default function Checklist() {
     fetchAllChecks();
   }, [team]);
 
+  const createTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTaskDescription.trim() || !team) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/team/${id}/task`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          team_id: team.id,
+          description: newTaskDescription
+        })
+      });
+
+      if (response.ok) {
+        const newTask = await response.json();
+        // Update the team state with the new task
+        setTeam(prev => prev ? {
+          ...prev,
+          tasks: [...(prev.tasks || []), newTask]
+        } : prev);
+        // Initialize empty checks for the new task
+        setChecks(prev => ({
+          ...prev,
+          [newTask.id]: []
+        }));
+        setNewTaskDescription(""); // Reset input
+        setOpen(false);
+        await fetchTeam();
+      }
+    } catch (error) {
+      console.error("Failed to create task:", error);
+    }
+  };
+
   const columns: ColumnDef<Player>[] = [
-    { header: "Player Name", accessorKey: "player_name" },
+    { id: "player_name", header: "Player Name", accessorKey: "player_name" },
   ]
 
   if (team?.tasks) {
     for (const task of team.tasks) {
       columns.push({
+        id: `task-${task.id}`,
         header: task.description,
         cell: ({ row }) => {
           const playerId = row.original.id;
@@ -101,10 +146,27 @@ export default function Checklist() {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-4">{team?.team_name} Checklist</h1>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button>Add Task</Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Task</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={createTask} className="grid gap-4 py-4">
+            <Input
+              placeholder="Task description"
+              value={newTaskDescription}
+              onChange={(e) => setNewTaskDescription(e.target.value)}
+            />
+            <Button type="submit">Create Task</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
       <div className="container mx-auto py-10">
         <CheckTable columns={columns} data={team?.players ?? []} checks={checks} />
       </div>
     </div>
-
   )
 }
