@@ -19,6 +19,13 @@ export default function Checklist() {
   const [checks, setChecks] = useState<Record<number, Check[]>>({});
   const [newTaskDescription, setNewTaskDescription] = useState<string>("");
   const [open, setOpen] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<number | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const handleDeleteClick = (taskId: number) => {
+    setTaskToDelete(taskId);
+    setDeleteDialogOpen(true);
+  };
 
   const fetchTeam = async () => {
     const res = await fetch(`${API_BASE_URL}/team/${id}`)
@@ -85,26 +92,28 @@ export default function Checklist() {
     }
   };
 
-  const deleteTask = async (taskId: number) => {
-    if (!team) return;
+  const confirmDelete = async () => {
+    if (!taskToDelete || !team) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/team/${team.id}/task/${taskId}`, {
+      const response = await fetch(`${API_BASE_URL}/team/${team.id}/task/${taskToDelete}`, {
         method: "DELETE",
       });
 
       if (response.ok) {
-        // Remove the checks for this task
         setChecks(prev => {
           const newChecks = { ...prev };
-          delete newChecks[taskId];
+          delete newChecks[taskToDelete];
           return newChecks;
         });
 
-        await fetchTeam(); // Refetch team data to update the columns
+        await fetchTeam();
       }
     } catch (error) {
       console.error("Failed to delete task:", error);
+    } finally {
+      setDeleteDialogOpen(false);
+      setTaskToDelete(null);
     }
   };
 
@@ -128,7 +137,7 @@ export default function Checklist() {
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
                   className="text-red-600"
-                  onClick={() => deleteTask(task.id)}
+                  onClick={() => handleDeleteClick(task.id)}
                 >
                   Delete Task
                 </DropdownMenuItem>
@@ -204,6 +213,30 @@ export default function Checklist() {
             />
             <Button type="submit">Create Task</Button>
           </form>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Delete</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p>Are you sure you want to delete this task? This action cannot be undone.</p>
+          </div>
+          <div className="flex justify-end gap-4">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+            >
+              Delete
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
       <div className="container mx-auto py-10">
