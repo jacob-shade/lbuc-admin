@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"fmt"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/jacobshade/lbuc-admin/server/interactors"
 	"github.com/jacobshade/lbuc-admin/server/model"
@@ -35,19 +37,24 @@ func GetTask(c *fiber.Ctx) error {
 
 func UpdateTask(c *fiber.Ctx) error {
 	// Get task id
+	fmt.Println("UpdateTask called")
 	id, err := c.ParamsInt("id")
 	if err != nil {
+		fmt.Println("Error getting task id:", err)
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
 	}
 
 	// Get update data
-	var description string
-	if err := c.BodyParser(&description); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	var task Task
+	if err := c.BodyParser(&task); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid description"})
 	}
 
 	// Update task
-	interactors.UpdateTask(model.Task{ID: uint(id), Description: description})
+	taskModel := model.Task{ID: uint(id), Description: task.Description}
+	if err := interactors.UpdateTask(taskModel); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to update task"})
+	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Task successfully updated"})
 }

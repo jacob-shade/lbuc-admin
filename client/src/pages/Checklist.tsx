@@ -21,10 +21,17 @@ export default function Checklist() {
   const [open, setOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<number | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<{ id: number, description: string } | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const handleDeleteClick = (taskId: number) => {
     setTaskToDelete(taskId);
     setDeleteDialogOpen(true);
+  };
+
+  const handleEditClick = (taskId: number, description: string) => {
+    setEditingTask({ id: taskId, description });
+    setEditDialogOpen(true);
   };
 
   const fetchTeam = async () => {
@@ -92,6 +99,31 @@ export default function Checklist() {
     }
   };
 
+  const confirmEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTask || !team) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/team/${team.id}/task/${editingTask.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          description: editingTask.description
+        })
+      });
+
+      if (response.ok) {
+        await fetchTeam(); // Refresh team data
+        setEditDialogOpen(false);
+        setEditingTask(null);
+      }
+    } catch (error) {
+      console.error("Failed to update task:", error);
+    }
+  };
+
   const confirmDelete = async () => {
     if (!taskToDelete || !team) return;
 
@@ -135,6 +167,11 @@ export default function Checklist() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => handleEditClick(task.id, task.description)}
+                >
+                  Edit Task
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   className="text-red-600"
                   onClick={() => handleDeleteClick(task.id)}
@@ -212,6 +249,39 @@ export default function Checklist() {
               onChange={(e) => setNewTaskDescription(e.target.value)}
             />
             <Button type="submit">Create Task</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Task</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={confirmEdit} className="grid gap-4 py-4">
+            <Input
+              placeholder="Task description"
+              value={editingTask?.description || ""}
+              onChange={(e) =>
+                setEditingTask(prev =>
+                  prev ? { ...prev, description: e.target.value } : null
+                )
+              }
+            />
+            <div className="flex justify-end gap-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setEditDialogOpen(false);
+                  setEditingTask(null);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button type="submit">
+                Save Changes
+              </Button>
+            </div>
           </form>
         </DialogContent>
       </Dialog>

@@ -33,12 +33,13 @@ func GetAllTasks() ([]model.Task, error) {
 
 func UpdateTask(task model.Task) error {
 	// Get task from database
-	task, err := database.GetTask(task.ID)
+	oldTask, err := database.GetTask(task.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get task: %w", err)
 	}
 
 	// Update task in database
+	task.ID = oldTask.ID
 	if err := database.UpdateTask(task); err != nil {
 		return fmt.Errorf("failed to update task: %w", err)
 	}

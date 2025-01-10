@@ -1,6 +1,10 @@
 package database
 
-import "github.com/jacobshade/lbuc-admin/server/model"
+import (
+	"fmt"
+
+	"github.com/jacobshade/lbuc-admin/server/model"
+)
 
 func CreateTask(task model.Task) (model.Task, error) {
 	if err := DB.Create(&task).Error; err != nil {
@@ -29,6 +33,7 @@ func UpdateTask(task model.Task) error {
 	if err := DB.Save(&task).Error; err != nil {
 		return err
 	}
+	fmt.Println("Task updated:", task)
 	return nil
 }
 

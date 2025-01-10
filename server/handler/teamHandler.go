@@ -177,6 +177,34 @@ func CreateTaskForTeam(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(CreateResponseTeam(team))
 }
 
+func UpdateTaskForTeam(c *fiber.Ctx) error {
+	// Get team ID
+	teamID, err := c.ParamsInt("teamId")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
+	}
+
+	// Get task id
+	taskID, err := c.ParamsInt("taskId")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
+	}
+
+	type UpdateTaskRequest struct {
+		Description string `json:"description"`
+	}
+	var req UpdateTaskRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid description"})
+	}
+
+	if err := interactors.UpdateTaskForTeam(uint(teamID), uint(taskID), req.Description); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Task removed from team successfully"})
+}
+
 func RemoveTaskFromTeam(c *fiber.Ctx) error {
 	// Get team ID
 	teamID, err := c.ParamsInt("teamId")

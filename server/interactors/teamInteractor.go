@@ -126,6 +126,29 @@ func CreateTaskForTeam(teamID uint, description string) (model.Team, error) {
 	return team, nil
 }
 
+func UpdateTaskForTeam(teamID uint, taskID uint, description string) error {
+	// Find team
+	team, err := GetTeam(teamID)
+	if err != nil {
+		return fmt.Errorf("failed to find team: %w", err)
+	}
+
+	// Find task
+	task, err := GetTask(taskID)
+	if err != nil {
+		return fmt.Errorf("failed to find task: %w", err)
+	}
+
+	// Update task
+	task.Description = description
+	task.TeamRefer = team.ID
+	if err := database.UpdateTask(task); err != nil {
+		return fmt.Errorf("failed to update task: %w", err)
+	}
+
+	return nil
+}
+
 func RemoveTaskFromTeam(teamID uint, taskID uint) error {
 	// Find team
 	team, err := GetTeam(teamID)
